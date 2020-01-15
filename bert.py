@@ -11,16 +11,26 @@ import tensorflow_hub as hub
 from tensorflow import keras
 
 def main():
-    max_seq_length = 128  # Your choice here.
+    maxlen = 128
+    bert_path = 'https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1'
 
-    input_word_ids = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32, name="input_word_ids")
-    input_mask = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32, name="input_mask")
-    segment_ids = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32, name="segment_ids")
-    bert_layer = hub.KerasLayer("https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1", trainable=True)
+    x_ids = np.random.randint(0, 5000, (1000, maxlen))
+    x_mask = np.random.randint(0, 2, (1000, maxlen))
+    x_seg = np.zeros((1000, maxlen))
+    y = np.random.randint(0, 2, (1000,))
+
+    input_word_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    input_mask = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    segment_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    bert_layer = hub.KerasLayer(bert_path, trainable=True)
     pooled_output, sequence_output = bert_layer([input_word_ids, input_mask, segment_ids])
+    out = tf.keras.layers.Dense(1)(pooled_output)
 
-    print(type(pooled_output), pooled_output)
-    print(type(sequence_output), sequence_output)
+    model = tf.keras.models.Model([input_word_ids, input_mask, segment_ids], out)
+    model.compile('adam', 'binary_crossentropy', ['acc'])
+    model.summary()
+
+    model.fit([x_ids, x_mask, x_seg], y, batch_size=8, epochs=10, validation_split=0.1)
 
 if __name__ == "__main__":
     main()
