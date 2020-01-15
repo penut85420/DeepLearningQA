@@ -12,7 +12,7 @@ from tensorflow import keras
 
 def main():
     maxlen = 128
-    bert_path = 'https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1'
+    bert_path = 'https://tfhub.dev/google/bert_multi_cased_L-12_H-768_A-12/1'
 
     x_ids = np.random.randint(0, 5000, (1000, maxlen))
     x_mask = np.random.randint(0, 2, (1000, maxlen))
