@@ -13,12 +13,16 @@ from bert.tokenization import FullTokenizer
 class BertTokenizer:
     def __init__(self, bert_path, tokenizer_cls=FullTokenizer, maxlen=512):
         self.maxlen = maxlen
-        with tf.compat.v1.Session() as sess:
-            bert = hub.Module(bert_path)
-            tk_info = bert(signature='tokenization_info', as_dict=True)
-            tk_info = [tk_info['vocab_file'], tk_info['do_lower_case']]
-            vocab_file, do_lower_case = sess.run(tk_info)
-            self.tokenizer = tokenizer_cls(vocab_file, do_lower_case)
+        # with tf.compat.v1.Session() as sess:
+        #     bert = hub.Module(bert_path)
+        #     tk_info = bert(signature='tokenization_info', as_dict=True)
+        #     tk_info = [tk_info['vocab_file'], tk_info['do_lower_case']]
+        #     vocab_file, do_lower_case = sess.run(tk_info)
+        #     self.tokenizer = tokenizer_cls(vocab_file, do_lower_case)
+        bert_layer = hub.KerasLayer(bert_path, trainable=True)
+        vocab_file = bert_layer.resolved_object.vocab_file.asset_path.numpy()
+        do_lower_case = bert_layer.resolved_object.do_lower_case.numpy()
+        tokenizer = FullTokenizer(vocab_file, do_lower_case)
 
     def convert_sentences_to_ids(self, sentences):
         ids = list(map(self.convert_single_sentence_to_ids, sentences))
