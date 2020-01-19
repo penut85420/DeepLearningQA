@@ -12,7 +12,7 @@ from tensorflow import keras
 
 def main():
     maxlen = 128
-    bert_path = 'https://tfhub.dev/google/bert_multi_cased_L-12_H-768_A-12/1'
+    bert_path = 'https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1'
 
     x_ids = np.random.randint(0, 5000, (1000, maxlen))
     x_mask = np.random.randint(0, 2, (1000, maxlen))
@@ -40,16 +40,23 @@ def main2():
     x_seg = np.zeros((1000, maxlen))
     y = np.random.randint(0, 2, (1000,))
 
+    def initialize_vars(sess):
+        sess.run(tf.local_variables_initializer())
+        sess.run(tf.global_variables_initializer())
+        sess.run(tf.tables_initializer())
+        tf.keras.backend.set_session(sess)
+    initialize_vars(sess=tf.Session())
+
     input_word_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
     input_mask = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
     segment_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
-    bert_module = hub.Module("https://tfhub.dev/google/bert_multi_cased_L-12_H-768_A-12/1", trainable=True)
+    bert_module = hub.Module('https://tfhub.dev/google/bert_multi_cased_L-12_H-768_A-12/1', trainable=True)
     bert_inputs = dict(
         input_ids=input_word_ids,
         input_mask=input_mask,
         segment_ids=segment_ids)
-    bert_outputs = bert_module(bert_inputs, signature="tokens", as_dict=True)
-    pooled_output = bert_outputs["pooled_output"]
+    bert_outputs = bert_module(bert_inputs, signature='tokens', as_dict=True)
+    pooled_output = bert_outputs['pooled_output']
     out = tf.keras.layers.Dense(1)(pooled_output)
 
     model = tf.keras.models.Model([input_word_ids, input_mask, segment_ids], out)

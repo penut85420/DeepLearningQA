@@ -2,7 +2,18 @@ import sys
 from penut.utils import TimeCost
 
 class SQuAD_Dataset:
-    data = []
+    def __init__(self, obj):
+        self.data = [SQuAD_Data(d) for d in obj['data']]
+        self.size = sum([len(d.examples) for d in self.data])
+
+    def iter_examples(self):
+        for d in self.data:
+            for ex in d:
+                yield ex
+
+    def __iter__(self):
+        for d in self.data:
+            yield d
 
     def __str__(self):
         rtn = []
@@ -10,17 +21,14 @@ class SQuAD_Dataset:
             rtn.append(str(d))
         return '\n'.join(rtn)
 
-    @classmethod
-    def parsing(cls, obj):
-        ds = SQuAD_Dataset()
-        for d in obj['data']:
-            dd = SQuAD_Data.parsing_json(d)
-            ds.data.append(dd)
-        return ds
-
 class SQuAD_Data:
-    examples = []
-    title = []
+    def __init__(self, obj):
+        self.title = obj['title']
+        self.examples = [SQuAD_Example(p) for p in obj['paragraphs']]
+
+    def __iter__(self):
+        for ex in self.examples:
+            yield ex
 
     def __str__(self):
         rtn = [f'Title: {self.title}']
@@ -28,18 +36,14 @@ class SQuAD_Data:
             rtn.append(str(ex))
         return '\n'.join(rtn)
 
-    @classmethod
-    def parsing_json(cls, obj):
-        d = SQuAD_Data()
-        d.title = obj['title']
-        for p in obj['paragraphs']:
-            ex = SQuAD_Example.parsing(p)
-            d.examples.append(ex)
-        return d
-
 class SQuAD_Example:
-    context = None
-    questions = []
+    def __init__(self, obj):
+        self.context = obj['context']
+        self.questions = [SQuAD_Question(qas) for qas in obj['qas']]
+
+    def __iter__(self):
+        for q in self.questions:
+            yield q
 
     def __str__(self):
         rtn = [f'Context Length: {len(self.context)}']
@@ -47,27 +51,20 @@ class SQuAD_Example:
             rtn.append(str(q))
         return '\n'.join(rtn)
 
-    @classmethod
-    def parsing(cls, obj):
-        ex = SQuAD_Example()
-        ex.context = obj['context']
-        for qas in obj['qas']:
-            q = SQuAD_Question()
-            q.qid = qas['id']
-            q.question = qas['question']
-            q.is_impossible = qas['is_impossible']
-            if not q.is_impossible:
-                q.answer_text = qas['answers'][0]['text']
-                q.answer_start = qas['answers'][0]['answer_start']
-            ex.questions.append(q)
-        return ex
-
 class SQuAD_Question:
     qid = None
     question = None
     answer_text = None
     answer_start = None
     is_impossible = None
+
+    def __init__(self, qas):
+        self.qid = qas['id']
+        self.question = qas['question']
+        self.is_impossible = qas['is_impossible']
+        if not self.is_impossible:
+            self.answer_text = qas['answers'][0]['text']
+            self.answer_start = qas['answers'][0]['answer_start']
 
     def __str__(self):
         rtn = [
@@ -79,18 +76,24 @@ class SQuAD_Question:
         ]
         return '\n'.join(rtn)
 
-def main():
+def demo():
     import penut.io as pio
 
     d = pio.load('./data/train-v2.0.json')
     with TimeCost('Parsing Time Cost'):
-        ds = SQuAD_Dataset.parsing(d)
+        ds = SQuAD_Dataset(d)
 
-    for d in ds.data:
-        for ex in d.examples:
-            for q in ex:
-                pass
+    # qnum = 0
+    # for d in ds:
+    #     for ex in d:
+    #         ctx = ex.context
+    #         for q in ex:
+    #             question = q.question
+    #             answer = q.answer_text
+    #             qnum += 1
+    #             print(f'{qnum}', end='\r')
+    # print(f'Question Numbers: {qnum}')
 
 if __name__ == "__main__":
-    sys.stdout = open('./a.log', 'w', encoding='UTF-8')
-    main()
+    # sys.stdout = open('./a.log', 'w', encoding='UTF-8')
+    demo()
