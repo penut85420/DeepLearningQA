@@ -45,21 +45,21 @@ def main():
     max_context_length = 855
     max_question_length = 63
     maxlen = 512
-    x, y = [], []
-    with TimeCost('Converting Tokens to IDs'):
-        for i, ex in enumerate(squad_ds.iter_examples()):
-            print(end=f'{i}/{squad_ds.size}\r')
-            for q in ex:
-                inn = tk.convert_sentence_to_features(q.question, ex.context, maxlen)
-                x.append(inn)
-                if q.is_impossible:
-                    y.append((0, 0))
-                else:
-                    answer_tokens = tk.tokenize(q.answer_text)
-                    y.append((q.answer_start, q.answer_start + len(answer_tokens)))
-    x, y = map(np.array, (x, y))
-    np.save('x', x)
-    np.save('y', y)
+    # x, y = [], []
+    # with TimeCost('Converting Tokens to IDs'):
+    #     for i, ex in enumerate(squad_ds.iter_examples()):
+    #         print(end=f'{i}/{squad_ds.size}\r')
+    #         for q in ex:
+    #             inn = tk.convert_sentence_to_features(q.question, ex.context, maxlen)
+    #             x.append(inn)
+    #             if q.is_impossible:
+    #                 y.append((0, 0))
+    #             else:
+    #                 answer_tokens = tk.tokenize(q.answer_text)
+    #                 y.append((q.answer_start, q.answer_start + len(answer_tokens)))
+    # x, y = map(np.array, (x, y))
+    # np.save('x', x)
+    # np.save('y', y)
     x = np.load('./x.npy')
     y = np.load('./y.npy')
     print(x.shape, y.shape)
