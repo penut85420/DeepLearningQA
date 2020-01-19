@@ -68,7 +68,7 @@ def main():
     (130319, 3, 918) (130319, 2)
     """
     model = build_model(maxlen)
-    model.fit([x[:, 0], x[:, 1], x[:, 2]], [y[:, 0], y[: 1]], epochs=3, validation_split=0.1)
+    model.fit([x[:, 0], x[:, 1], x[:, 2]], [y[:, 0], y[:, 1]], epochs=3, validation_split=0.1)
 
 if __name__ == "__main__":
     main()
