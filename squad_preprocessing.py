@@ -42,9 +42,9 @@ def main():
     Counting Max Length: 69.487302
     """
 
-    # max_context_length = 855
-    # max_question_length = 63
-    # maxlen = max_context_length + max_question_length
+    max_context_length = 855
+    max_question_length = 63
+    maxlen = max_context_length + max_question_length
     # x, y = [], []
     # with TimeCost('Converting Tokens to IDs'):
     #     for i, ex in enumerate(squad_ds.iter_examples()):
