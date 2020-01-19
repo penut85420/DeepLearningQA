@@ -10,6 +10,26 @@ import tensorflow_hub as hub
 
 from tensorflow import keras
 
+def build_model(maxlen):
+    bert_path = 'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/1'
+
+    input_word_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    input_mask = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    segment_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+    bert_layer = hub.KerasLayer(bert_path, trainable=True)
+    pooled_output, sequence_output = bert_layer([input_word_ids, input_mask, segment_ids])
+    hid = tf.keras.layers.Reshape((maxlen, 768))(sequence_output)
+    hid = tf.keras.layers.Flatten()(hid)
+    hid = tf.keras.layers.Dense(768)(hid)
+    out_begin = tf.keras.layers.Dense(maxlen, name='Begin')(hid)
+    out_end = tf.keras.layers.Dense(maxlen, name='End')(hid)
+
+    model = tf.keras.models.Model([input_word_ids, input_mask, segment_ids], [out_begin, out_end])
+    model.compile('adam', 'binary_crossentropy', ['acc'])
+    model.summary()
+
+    return model
+
 def main():
     maxlen = 128
     bert_path = 'https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1'
@@ -65,5 +85,8 @@ def main2():
 
     model.fit([x_ids, x_mask, x_seg], y, batch_size=8, epochs=10, validation_split=0.1)
 
+def main3():
+    model = build_model(128)
+
 if __name__ == "__main__":
-    main2()
+    main3()

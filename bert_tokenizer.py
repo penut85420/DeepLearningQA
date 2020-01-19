@@ -30,14 +30,29 @@ class BertTokenizer:
         tokens += (self.maxlen - len(tokens)) * ['[PAD]']
         return self.tokenizer.convert_tokens_to_ids(tokens)
 
-    def convert_two_sentence_to_ids(self, sent1, sent2, maxlen=None):
+    def convert_two_sentence_to_ids(self, sent1, sent2, maxlen=None, return_tokens=False):
         if not maxlen:
             maxlen = self.maxlen
         tokens1 = self.tokenize(sent1)
         tokens2 = self.tokenize(sent2)
         tokens = ['[CLS]'] + tokens1 + ['[SEP]'] + tokens2 + ['[SEP]']
         tokens += (maxlen - len(tokens)) * ['[PAD]']
-        return self.tokenizer.convert_tokens_to_ids(tokens)
+        ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        if return_tokens:
+            return tokens1, tokens2, ids
+        return ids
+
+    def convert_sentence_to_features(self, sent1, sent2, maxlen=None):
+        if not maxlen:
+            maxlen = self.maxlen
+        
+        tokens1, tokens2, token_ids = self.convert_two_sentence_to_ids(sent1, sent2, maxlen, return_tokens=True)
+        segment_ids = [0] * (len(tokens1) + 2) + [1] * (len(tokens2) + 1)
+        input_mask = [1] * len(segment_ids)
+        segment_ids += (maxlen - len(segment_ids)) * [0]
+        input_mask += (maxlen - len(input_mask)) * [0]
+
+        return token_ids, input_mask, segment_ids
 
     def tokenize(self, sent):
         return self.tokenizer.tokenize(sent)
