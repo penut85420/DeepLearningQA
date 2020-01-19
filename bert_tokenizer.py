@@ -56,3 +56,7 @@ class BertTokenizer:
 
     def tokenize(self, sent):
         return self.tokenizer.tokenize(sent)
+
+if __name__ == "__main__":
+    bert_path = 'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/1'
+    t = BertTokenizer(bert_path)

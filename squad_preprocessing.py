@@ -42,31 +42,33 @@ def main():
     Counting Max Length: 69.487302
     """
 
-    max_context_length = 855
-    max_question_length = 63
-    maxlen = max_context_length + max_question_length
-    x, y = [], []
-    with TimeCost('Converting Tokens to IDs'):
-        for i, ex in enumerate(squad_ds.iter_examples()):
-            print(end=f'{i}/{squad_ds.size}\r')
-            for q in ex:
-                inn = tk.convert_sentence_to_features(q.question, ex.context, maxlen)
-                x.append(inn)
-                if q.is_impossible:
-                    y.append((0, 0))
-                else:
-                    answer_tokens = tk.tokenize(q.answer_text)
-                    y.append((q.answer_start, q.answer_start + len(answer_tokens)))
-    x, y = map(np.array, (x, y))
-    np.save('x', x)
-    np.save('y', y)
+    # max_context_length = 855
+    # max_question_length = 63
+    # maxlen = max_context_length + max_question_length
+    # x, y = [], []
+    # with TimeCost('Converting Tokens to IDs'):
+    #     for i, ex in enumerate(squad_ds.iter_examples()):
+    #         print(end=f'{i}/{squad_ds.size}\r')
+    #         for q in ex:
+    #             inn = tk.convert_sentence_to_features(q.question, ex.context, maxlen)
+    #             x.append(inn)
+    #             if q.is_impossible:
+    #                 y.append((0, 0))
+    #             else:
+    #                 answer_tokens = tk.tokenize(q.answer_text)
+    #                 y.append((q.answer_start, q.answer_start + len(answer_tokens)))
+    # x, y = map(np.array, (x, y))
+    # np.save('x', x)
+    # np.save('y', y)
+    x = np.load('./x.npy')
+    y = np.load('./y.npy')
     print(x.shape, y.shape)
     """
     Converting Tokens to IDs: 201.184903
     (130319, 3, 918) (130319, 2)
     """
     model = build_model(maxlen)
-    model.fit([x[:, 0], x[: 1], x[:, 2]], [y[:, 0], y[: 1]], epochs=3, validation_split=0.1)
+    model.fit([x[:, 0], x[:, 1], x[:, 2]], [y[:, 0], y[: 1]], epochs=3, validation_split=0.1)
 
 if __name__ == "__main__":
     main()
