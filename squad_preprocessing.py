@@ -19,7 +19,7 @@ def main():
 
     with TimeCost('Loading Bert Tokenizer'):
         bert_path = 'https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1'
-        bert_path = 'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/1'
+        # bert_path = 'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/1'
         tk = BertTokenizer(bert_path)
 
     # with TimeCost('Counting Max Length of Contexts & Questions'):
