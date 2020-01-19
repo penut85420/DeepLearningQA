@@ -25,7 +25,7 @@ def build_model(maxlen):
     out_end = tf.keras.layers.Dense(maxlen, name='End')(hid)
 
     model = tf.keras.models.Model([input_word_ids, input_mask, segment_ids], [out_begin, out_end])
-    model.compile('adam', 'binary_crossentropy', ['acc'])
+    model.compile('adam', 'sparse_categorical_crossentropy', ['acc'])
     model.summary()
 
     return model
