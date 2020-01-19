@@ -35,6 +35,8 @@ class BertTokenizer:
             maxlen = self.maxlen
         tokens1 = self.tokenize(sent1)
         tokens2 = self.tokenize(sent2)
+        if len(tokens1) + len(tokens2) > maxlen - 3:
+            tokens2 = tokens2[:maxlen - 3 - len(tokens1)]
         tokens = ['[CLS]'] + tokens1 + ['[SEP]'] + tokens2 + ['[SEP]']
         tokens += (maxlen - len(tokens)) * ['[PAD]']
         ids = self.tokenizer.convert_tokens_to_ids(tokens)
