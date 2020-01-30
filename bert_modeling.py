@@ -9,6 +9,7 @@ import numpy as np
 import tensorflow_hub as hub
 
 from tensorflow import keras
+from bert.optimization import AdamWeightDecayOptimizer
 
 def build_model(maxlen):
     bert_path = 'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/1'
@@ -16,16 +17,20 @@ def build_model(maxlen):
     input_word_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
     input_mask = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
     segment_ids = tf.keras.layers.Input(shape=(maxlen,), dtype=tf.int32)
+
     bert_layer = hub.KerasLayer(bert_path, trainable=True)
     pooled_output, sequence_output = bert_layer([input_word_ids, input_mask, segment_ids])
+
     hid = tf.keras.layers.Reshape((maxlen, 768))(sequence_output)
     hid = tf.keras.layers.Flatten()(hid)
-    hid = tf.keras.layers.Dense(768)(hid)
+    hid = tf.keras.layers.Dense(128)(hid)
+
     out_begin = tf.keras.layers.Dense(maxlen, name='Begin')(hid)
     out_end = tf.keras.layers.Dense(maxlen, name='End')(hid)
 
     model = tf.keras.models.Model([input_word_ids, input_mask, segment_ids], [out_begin, out_end])
-    model.compile('adam', 'sparse_categorical_crossentropy', ['acc'])
+    opt = AdamWeightDecayOptimizer(learning_rate=3e-5)
+    model.compile(opt, 'sparse_categorical_crossentropy', ['acc'])
     model.summary()
 
     return model

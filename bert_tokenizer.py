@@ -22,7 +22,7 @@ class BertTokenizer:
         bert_layer = hub.KerasLayer(bert_path, trainable=True)
         vocab_file = bert_layer.resolved_object.vocab_file.asset_path.numpy()
         do_lower_case = bert_layer.resolved_object.do_lower_case.numpy()
-        tokenizer = FullTokenizer(vocab_file, do_lower_case)
+        self.tokenizer = FullTokenizer(vocab_file, do_lower_case)
 
     def convert_sentences_to_ids(self, sentences):
         ids = list(map(self.convert_single_sentence_to_ids, sentences))
