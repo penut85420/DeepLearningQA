@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ALBERT_MODEL_DIR='./models/albert_base_zh'
+export ALBERT_MODEL_DIR='./models/albert_base'
 export DRCD_DIR='../DRCD'
 export OUTPUT_DIR='./outputs/drcd'
 export FEATURE_DIR='./features/drcd'
@@ -15,7 +15,8 @@ python run_drcd.py \
   --predict_feature_file=$FEATURE_DIR/predict_feature_file.tf \
   --predict_feature_left_file=$FEATURE_DIR/predict_feature_left_file.tf \
   --init_checkpoint=$ALBERT_MODEL_DIR/model.ckpt-best \
-  --vocab_file=$ALBERT_MODEL_DIR/vocab_chinese.txt \
+  # --vocab_file=$ALBERT_MODEL_DIR/vocab_chinese.txt \
+  --spm_model_file=$ALBERT_MODEL_DIR/30k-clean.model \
   --do_lower_case \
   --max_seq_length=384 \
   --doc_stride=128 \
